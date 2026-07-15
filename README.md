@@ -54,7 +54,15 @@ python train.py \
 
 ## 4. 最终测试
 
-检查 `training_summary.json`，确认训练和所有超参数选择均已结束。随后只运行一次：
+确定当前运行即最终全量训练时，可使用一条命令在训练成功结束后自动执行唯一一次测试集评估：
+
+```bash
+./run_full_and_evaluate.sh
+```
+
+训练报错或被中断时，脚本不会读取测试集。正常完成、早停或达到训练时间上限后，脚本加载 `outputs/best.ckpt` 并执行测试。
+
+如已单独完成全量训练，检查 `training_summary.json`，确认训练和所有超参数选择均已结束。随后只运行一次：
 
 ```bash
 python evaluate_test_once.py \
@@ -73,3 +81,4 @@ python evaluate_test_once.py \
 - `data.py`：分离的训练、验证和最终测试数据入口；
 - `train.py`：训练、手写 accuracy 评估、验证选模、早停与限时；
 - `evaluate_test_once.py`：加载最佳权重并执行唯一一次测试评估。
+- `run_full_and_evaluate.sh`：全量训练成功结束后自动执行最终测试。
