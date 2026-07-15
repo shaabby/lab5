@@ -22,6 +22,11 @@ def parse_args():
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, default=Path("outputs"))
     parser.add_argument("--device-id", type=int, default=int(os.getenv("DEVICE_ID", "0")))
+    parser.add_argument(
+        "--device-target",
+        choices=("Ascend", "CPU"),
+        default="Ascend",
+    )
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--epochs", type=int, default=80)
     parser.add_argument("--workers", type=int, default=8)
@@ -219,11 +224,13 @@ def main():
     execution_mode = (
         ms.GRAPH_MODE if args.execution_mode == "graph" else ms.PYNATIVE_MODE
     )
-    ms.set_context(
+    context_options = dict(
         mode=execution_mode,
-        device_target="Ascend",
-        device_id=args.device_id,
+        device_target=args.device_target,
     )
+    if args.device_target == "Ascend":
+        context_options["device_id"] = args.device_id
+    ms.set_context(**context_options)
 
     training_dataset = build_training_dataset(
         args.data_root,
@@ -288,7 +295,9 @@ def main():
             TimeMonitor(data_size=steps_per_epoch),
             controller,
         ],
-        dataset_sink_mode=args.execution_mode == "graph",
+        dataset_sink_mode=(
+            args.execution_mode == "graph" and args.device_target == "Ascend"
+        ),
     )
     print(
         f"训练结束：best_val_acc={controller.best_accuracy:.4%}, "
