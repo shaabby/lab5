@@ -163,17 +163,6 @@ class ValidationController(Callback):
         epoch = int(callback_parameters.cur_epoch_num)
         print(f"epoch={epoch}/{self.config['epochs']} start", flush=True)
 
-    def on_train_step_begin(self, run_context):
-        callback_parameters = run_context.original_args()
-        epoch = int(callback_parameters.cur_epoch_num)
-        step = (int(callback_parameters.cur_step_num) - 1) % self.config[
-            "steps_per_epoch"
-        ] + 1
-        print(
-            f"epoch={epoch} step={step}/{self.config['steps_per_epoch']} start",
-            flush=True,
-        )
-
     def on_train_epoch_end(self, run_context):
         callback_parameters = run_context.original_args()
         epoch = int(callback_parameters.cur_epoch_num)
@@ -307,7 +296,7 @@ def main():
         args.epochs,
         training_dataset,
         callbacks=[
-            LossMonitor(per_print_times=1),
+            LossMonitor(per_print_times=max(1, steps_per_epoch // 5)),
             TimeMonitor(data_size=steps_per_epoch),
             controller,
         ],
