@@ -35,6 +35,11 @@ def parse_args():
     parser.add_argument("--patience", type=int, default=12)
     parser.add_argument("--max-minutes", type=float, default=120.0)
     parser.add_argument("--amp-level", choices=("O0", "O2", "O3"), default="O2")
+    parser.add_argument(
+        "--execution-mode",
+        choices=("graph", "pynative"),
+        default="graph",
+    )
     parser.add_argument("--seed", type=int, default=2026)
     return parser.parse_args()
 
@@ -211,8 +216,11 @@ def main():
     ms.set_seed(args.seed)
     ds.config.set_seed(args.seed)
     np.random.seed(args.seed)
+    execution_mode = (
+        ms.GRAPH_MODE if args.execution_mode == "graph" else ms.PYNATIVE_MODE
+    )
     ms.set_context(
-        mode=ms.GRAPH_MODE,
+        mode=execution_mode,
         device_target="Ascend",
         device_id=args.device_id,
     )
@@ -280,7 +288,7 @@ def main():
             TimeMonitor(data_size=steps_per_epoch),
             controller,
         ],
-        dataset_sink_mode=True,
+        dataset_sink_mode=args.execution_mode == "graph",
     )
     print(
         f"训练结束：best_val_acc={controller.best_accuracy:.4%}, "

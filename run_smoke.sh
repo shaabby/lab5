@@ -14,4 +14,6 @@ exec "${SCRIPT_DIR}/run_train.sh" \
     --base-lr 0.0015 \
     --patience 2 \
     --max-minutes 10 \
+    --execution-mode pynative \
+    --amp-level O0 \
     "$@"
