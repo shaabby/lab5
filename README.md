@@ -52,7 +52,7 @@ python train.py \
 
 首次云端运行先观察第一个 epoch。显存不足时只调整批大小，例如 `--batch-size 64`；数据加载报资源不足时只调整 `--workers 4`。改变 batch size 后建议按比例调整学习率：batch size 64 对应 `--base-lr 0.0015`。
 
-### WideResNet8 验证实验
+### WideResNet8 实验
 
 `WideResNet8` 使用一个 32 通道 stem，以及通道数为 32、64、128 的三个 BasicBlock。每个 BasicBlock 包含两层 3×3 卷积，降采样块使用 1×1 投影残差，最后连接全局平均池化和分类层。
 
@@ -62,7 +62,7 @@ python train.py \
 ./run_resnet8.sh
 ```
 
-模型和验证记录写入 `outputs_resnet8/`。训练成功结束后，脚本重新加载 `best.ckpt`，只在 `val/` 上评估并生成 `outputs_resnet8/validation_result.json`。该脚本不会读取 `test/`。
+模型和验证记录写入 `outputs_resnet8/`。训练成功结束后，脚本重新加载 `best.ckpt`，执行测试集评估并生成 `outputs_resnet8/test_result.json`。测试保护记录位于 `outputs_resnet8/TEST_EVALUATION_STARTED.json`。
 
 ## 4. 最终测试
 
@@ -96,4 +96,4 @@ python evaluate_test_once.py \
 - `evaluate_validation.py`：重新加载指定模型并只评估验证集；
 - `evaluate_test_once.py`：加载最佳权重并执行唯一一次测试评估。
 - `run_full_and_evaluate.sh`：全量训练成功结束后自动执行最终测试。
-- `run_resnet8.sh`：只使用训练集和验证集训练 WideResNet8。
+- `run_resnet8.sh`：训练 WideResNet8，并在成功结束后执行测试集评估。

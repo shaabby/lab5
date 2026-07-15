@@ -10,8 +10,7 @@ import mindspore as ms
 from mindspore import nn
 
 from data import CLASS_NAMES, build_final_test_dataset
-from model import create_model
-from train import evaluate_accuracy, write_json
+from train import MODEL_FACTORIES, evaluate_accuracy, write_json
 
 
 def parse_args():
@@ -19,6 +18,7 @@ def parse_args():
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, default=Path("outputs"))
+    parser.add_argument("--model", choices=tuple(MODEL_FACTORIES), default="simple")
     parser.add_argument("--device-id", type=int, default=int(os.getenv("DEVICE_ID", "0")))
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--workers", type=int, default=8)
@@ -50,7 +50,7 @@ def main():
         device_target="Ascend",
         device_id=args.device_id,
     )
-    network = create_model(num_classes=len(CLASS_NAMES))
+    network = MODEL_FACTORIES[args.model](num_classes=len(CLASS_NAMES))
     checkpoint_parameters = ms.load_checkpoint(str(args.checkpoint))
     parameters_not_loaded, checkpoint_entries_not_loaded = ms.load_param_into_net(
         network,
@@ -66,6 +66,7 @@ def main():
 
     guard = {
         "started_at_utc": datetime.now(timezone.utc).isoformat(),
+        "model": args.model,
         "checkpoint": str(args.checkpoint.resolve()),
         "data_root": str(args.data_root.resolve()),
     }
@@ -81,6 +82,7 @@ def main():
     metrics = evaluate_accuracy(network, test_dataset, nn.CrossEntropyLoss())
     result = {
         "completed_at_utc": datetime.now(timezone.utc).isoformat(),
+        "model": args.model,
         "checkpoint": str(args.checkpoint.resolve()),
         "test_examples": metrics["examples"],
         "test_loss": metrics["loss"],
