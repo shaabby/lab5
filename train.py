@@ -25,6 +25,8 @@ def parse_args():
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--epochs", type=int, default=80)
     parser.add_argument("--workers", type=int, default=8)
+    parser.add_argument("--train-samples", type=int, default=None)
+    parser.add_argument("--val-samples", type=int, default=None)
     parser.add_argument("--base-lr", type=float, default=3e-3)
     parser.add_argument("--min-lr", type=float, default=2e-5)
     parser.add_argument("--warmup-epochs", type=int, default=3)
@@ -44,6 +46,10 @@ def validate_args(args):
         raise ValueError("warmup-epochs 必须满足 0 <= warmup-epochs < epochs")
     if args.patience <= 0 or args.max_minutes <= 0:
         raise ValueError("patience 和 max-minutes 必须为正数")
+    if args.train_samples is not None and args.train_samples <= 0:
+        raise ValueError("train-samples 必须为正数")
+    if args.val_samples is not None and args.val_samples <= 0:
+        raise ValueError("val-samples 必须为正数")
     if not 0.0 <= args.label_smoothing < 1.0:
         raise ValueError("label-smoothing 必须位于 [0, 1)")
 
@@ -215,11 +221,13 @@ def main():
         args.data_root,
         batch_size=args.batch_size,
         workers=args.workers,
+        num_samples=args.train_samples,
     )
     validation_dataset = build_validation_dataset(
         args.data_root,
         batch_size=args.batch_size,
         workers=args.workers,
+        num_samples=args.val_samples,
     )
     steps_per_epoch = training_dataset.get_dataset_size()
     if steps_per_epoch <= 0:

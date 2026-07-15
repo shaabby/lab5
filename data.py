@@ -42,16 +42,18 @@ def _check_split_directory(split_directory):
     return split_directory
 
 
-def _build_dataset(split_directory, batch_size, workers, training):
+def _build_dataset(split_directory, batch_size, workers, training, num_samples=None):
     split_directory = _check_split_directory(split_directory)
     dataset = ds.ImageFolderDataset(
         str(split_directory),
         class_indexing=CLASS_TO_INDEX,
         extensions=[".jpg", ".jpeg", ".JPG", ".JPEG"],
         num_parallel_workers=workers,
-        shuffle=training,
+        shuffle=training or num_samples is not None,
         decode=False,
     )
+    if num_samples is not None:
+        dataset = dataset.take(num_samples)
 
     if training:
         image_operations = [
@@ -94,23 +96,25 @@ def _build_dataset(split_directory, batch_size, workers, training):
     return dataset.batch(batch_size, drop_remainder=training)
 
 
-def build_training_dataset(data_root, batch_size, workers):
+def build_training_dataset(data_root, batch_size, workers, num_samples=None):
     """仅加载 train/。"""
     return _build_dataset(
         Path(data_root) / "train",
         batch_size=batch_size,
         workers=workers,
         training=True,
+        num_samples=num_samples,
     )
 
 
-def build_validation_dataset(data_root, batch_size, workers):
+def build_validation_dataset(data_root, batch_size, workers, num_samples=None):
     """仅加载 val/，不用于参数更新。"""
     return _build_dataset(
         Path(data_root) / "val",
         batch_size=batch_size,
         workers=workers,
         training=False,
+        num_samples=num_samples,
     )
 
 
