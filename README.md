@@ -62,7 +62,7 @@ python train.py \
 ./run_resnet8.sh
 ```
 
-模型和验证记录写入 `outputs_resnet8/`。该脚本不会读取 `test/`。
+模型和验证记录写入 `outputs_resnet8/`。训练成功结束后，脚本重新加载 `best.ckpt`，只在 `val/` 上评估并生成 `outputs_resnet8/validation_result.json`。该脚本不会读取 `test/`。
 
 ## 4. 最终测试
 
@@ -93,6 +93,7 @@ python evaluate_test_once.py \
 - `model_resnet8.py`：独立的 WideResNet8 和 BasicBlock；
 - `data.py`：分离的训练、验证和最终测试数据入口；
 - `train.py`：训练、手写 accuracy 评估、验证选模、早停与限时；
+- `evaluate_validation.py`：重新加载指定模型并只评估验证集；
 - `evaluate_test_once.py`：加载最佳权重并执行唯一一次测试评估。
 - `run_full_and_evaluate.sh`：全量训练成功结束后自动执行最终测试。
 - `run_resnet8.sh`：只使用训练集和验证集训练 WideResNet8。
