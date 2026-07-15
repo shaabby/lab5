@@ -18,7 +18,7 @@ from model import create_model
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="训练 GeoFusionNet")
+    parser = argparse.ArgumentParser(description="训练 SimpleEuroSATCNN")
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, default=Path("outputs"))
     parser.add_argument("--device-id", type=int, default=int(os.getenv("DEVICE_ID", "0")))
@@ -311,9 +311,7 @@ def main():
             TimeMonitor(data_size=steps_per_epoch),
             controller,
         ],
-        dataset_sink_mode=(
-            args.execution_mode == "graph" and args.device_target == "Ascend"
-        ),
+        dataset_sink_mode=False,
     )
     print(
         f"训练结束：best_val_acc={controller.best_accuracy:.4%}, "

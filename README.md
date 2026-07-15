@@ -1,6 +1,6 @@
-# Lab5 参考实现：GeoFusionNet
+# Lab5 参考实现：SimpleEuroSATCNN
 
-该实现用于理解和二次修改。网络由基础 MindSpore 算子组合，未调用高层经典模型封装。训练入口只构造 `train/` 与 `val/` 数据集；测试入口独立，并通过确认参数和持久化标记阻止重复评估。
+该实现用于理解和二次修改。网络由四组 `Conv2d → ReLU → MaxPool2d` 和一个分类层组成，未调用高层经典模型封装。训练入口只构造 `train/` 与 `val/` 数据集；测试入口独立，并通过确认参数和持久化标记阻止重复评估。
 
 ## 1. 云端环境
 
@@ -31,6 +31,16 @@ eurosat_split/
 
 ## 3. 训练与验证
 
+首次运行使用单 epoch 冒烟训练，逐 step 输出进度并返回验证准确率：
+
+```bash
+./run_smoke.sh
+```
+
+冒烟配置使用 256 张训练图像、128 张验证图像、batch size 32、GRAPH 模式和 O0。数据下沉保持关闭，便于观察每个 step 的输出。
+
+完整训练命令：
+
 ```bash
 python train.py \
   --data-root /path/to/eurosat_split \
@@ -59,7 +69,7 @@ python evaluate_test_once.py \
 
 ## 5. 文件职责
 
-- `model.py`：自定义 GeoFusionNet；
+- `model.py`：自定义四层 SimpleEuroSATCNN；
 - `data.py`：分离的训练、验证和最终测试数据入口；
 - `train.py`：训练、手写 accuracy 评估、验证选模、早停与限时；
 - `evaluate_test_once.py`：加载最佳权重并执行唯一一次测试评估。

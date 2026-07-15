@@ -5,15 +5,15 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 exec "${SCRIPT_DIR}/run_train.sh" \
     --output-dir "${SCRIPT_DIR}/outputs_smoke" \
-    --epochs 2 \
-    --warmup-epochs 1 \
-    --batch-size 64 \
-    --workers 4 \
-    --train-samples 1024 \
-    --val-samples 512 \
-    --base-lr 0.0015 \
-    --patience 2 \
-    --max-minutes 10 \
-    --execution-mode pynative \
+    --epochs 1 \
+    --warmup-epochs 0 \
+    --batch-size 32 \
+    --workers 2 \
+    --train-samples 256 \
+    --val-samples 128 \
+    --base-lr 0.001 \
+    --patience 1 \
+    --max-minutes 5 \
+    --execution-mode graph \
     --amp-level O0 \
     "$@"
