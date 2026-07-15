@@ -14,13 +14,21 @@ from mindspore import Tensor, nn
 from mindspore.train.callback import Callback, LossMonitor, TimeMonitor
 
 from data import CLASS_NAMES, build_training_dataset, build_validation_dataset
-from model import create_model
+from model import create_model as create_simple_model
+from model_resnet8 import create_model as create_resnet8_model
+
+
+MODEL_FACTORIES = {
+    "simple": create_simple_model,
+    "resnet8": create_resnet8_model,
+}
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="训练 SimpleEuroSATCNN")
+    parser = argparse.ArgumentParser(description="训练 EuroSAT 分类模型")
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, default=Path("outputs"))
+    parser.add_argument("--model", choices=tuple(MODEL_FACTORIES), default="simple")
     parser.add_argument("--device-id", type=int, default=int(os.getenv("DEVICE_ID", "0")))
     parser.add_argument(
         "--device-target",
@@ -253,7 +261,7 @@ def main():
     if steps_per_epoch <= 0:
         raise RuntimeError("训练数据集为空或 batch-size 过大")
 
-    network = create_model(num_classes=len(CLASS_NAMES))
+    network = MODEL_FACTORIES[args.model](num_classes=len(CLASS_NAMES))
     learning_rate = cosine_learning_rate(
         args.base_lr,
         args.min_lr,
