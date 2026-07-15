@@ -47,6 +47,7 @@ def _build_dataset(split_directory, batch_size, workers, training):
     dataset = ds.ImageFolderDataset(
         str(split_directory),
         class_indexing=CLASS_TO_INDEX,
+        extensions=[".jpg", ".jpeg", ".JPG", ".JPEG"],
         num_parallel_workers=workers,
         shuffle=training,
         decode=False,
